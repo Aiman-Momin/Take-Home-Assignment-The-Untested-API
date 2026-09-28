@@ -45,7 +45,7 @@ describe('GET /tasks', () => {
       expect(res.body).toEqual([]);
     });
 
-    // BUG-2: "?status=do" matches both "todo" and "done".
+    // BUG-2: ?status=do returns todo + done
     test.failing('does not match partial status strings', async () => {
       const res = await request(app).get('/tasks?status=do').expect(200);
       expect(res.body).toEqual([]);
@@ -119,7 +119,7 @@ describe('POST /tasks', () => {
     await request(app).post('/tasks').expect(400);
   });
 
-  // BUG-5: malformed JSON hits the catch-all error handler and becomes a 500.
+  // BUG-5: error handler in app.js always sends 500
   test.failing('returns 400 (not 500) for malformed JSON', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
     await request(app)
@@ -156,7 +156,7 @@ describe('PUT /tasks/:id', () => {
     await request(app).put(`/tasks/${task.id}`).send({ priority: 'urgent' }).expect(400);
   });
 
-  // BUG-4: body is merged wholesale, so a client can rewrite the task id.
+  // BUG-4
   test.failing('ignores attempts to change the id', async () => {
     const task = await createTask({ title: 'a' });
     const res = await request(app).put(`/tasks/${task.id}`).send({ id: 'hijacked' }).expect(200);
@@ -198,7 +198,7 @@ describe('PATCH /tasks/:id/complete', () => {
     await request(app).patch('/tasks/does-not-exist/complete').expect(404);
   });
 
-  // BUG-3: completing a task resets priority to "medium".
+  // BUG-3
   test.failing('does not change the priority', async () => {
     const task = await createTask({ title: 'a', priority: 'high' });
     const res = await request(app).patch(`/tasks/${task.id}/complete`).expect(200);

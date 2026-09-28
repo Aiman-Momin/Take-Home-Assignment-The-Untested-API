@@ -89,7 +89,7 @@ describe('getByStatus', () => {
     expect(taskService.getByStatus('archived')).toEqual([]);
   });
 
-  // BUG-2: uses String#includes, so partial strings match.
+  // BUG-2: includes() instead of ===
   test.failing('does not match on a partial status string', () => {
     expect(taskService.getByStatus('do')).toEqual([]);
   });
@@ -144,7 +144,7 @@ describe('update', () => {
     expect(taskService.update('nope', { title: 'b' })).toBeNull();
   });
 
-  // BUG-4: fields are spread wholesale, so server-owned fields can be overwritten.
+  // BUG-4: whole body gets spread in, nothing is whitelisted
   test.failing('does not allow overwriting id or createdAt', () => {
     const task = taskService.create({ title: 'a' });
     const updated = taskService.update(task.id, { id: 'hijacked', createdAt: PAST });
@@ -179,7 +179,7 @@ describe('completeTask', () => {
     expect(taskService.completeTask('nope')).toBeNull();
   });
 
-  // BUG-3: completing a task silently resets its priority to "medium".
+  // BUG-3: priority is hardcoded to medium in completeTask
   test.failing('preserves the task priority', () => {
     const task = taskService.create({ title: 'a', priority: 'high' });
     expect(taskService.completeTask(task.id).priority).toBe('high');
