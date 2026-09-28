@@ -57,18 +57,22 @@ describe('GET /tasks', () => {
       for (let i = 1; i <= 5; i++) await createTask({ title: `task ${i}` });
     });
 
-    // BUG-1: page 1 returns the second page.
-    test.failing('page=1 returns the first page', async () => {
+    test('page=1 returns the first page', async () => {
       const res = await request(app).get('/tasks?page=1&limit=2').expect(200);
       expect(res.body.map((t) => t.title)).toEqual(['task 1', 'task 2']);
     });
 
-    test.failing('defaults to page 1 when only limit is given', async () => {
+    test('page=2 returns the next slice', async () => {
+      const res = await request(app).get('/tasks?page=2&limit=2').expect(200);
+      expect(res.body.map((t) => t.title)).toEqual(['task 3', 'task 4']);
+    });
+
+    test('defaults to page 1 when only limit is given', async () => {
       const res = await request(app).get('/tasks?limit=3').expect(200);
       expect(res.body.map((t) => t.title)).toEqual(['task 1', 'task 2', 'task 3']);
     });
 
-    test.failing('non-numeric limit falls back to 10', async () => {
+    test('non-numeric limit falls back to 10', async () => {
       const res = await request(app).get('/tasks?page=1&limit=abc').expect(200);
       expect(res.body).toHaveLength(5);
     });

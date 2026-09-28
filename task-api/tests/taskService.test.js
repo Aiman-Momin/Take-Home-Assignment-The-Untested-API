@@ -100,13 +100,12 @@ describe('getPaginated', () => {
     for (let i = 1; i <= 5; i++) taskService.create({ title: `task ${i}` });
   });
 
-  // BUG-1: page is treated as 0-based, so page 1 skips the first page.
-  test.failing('page 1 returns the first `limit` tasks', () => {
+  test('page 1 returns the first `limit` tasks', () => {
     const titles = taskService.getPaginated(1, 2).map((t) => t.title);
     expect(titles).toEqual(['task 1', 'task 2']);
   });
 
-  test.failing('last page returns the remainder', () => {
+  test('last page returns the remainder', () => {
     const titles = taskService.getPaginated(3, 2).map((t) => t.title);
     expect(titles).toEqual(['task 5']);
   });
